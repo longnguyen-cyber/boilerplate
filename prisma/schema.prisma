@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Sex {
+  man
+  feMan
+  other
+}
+
+enum TypeUser {
+  normal
+  google
+}
+
+enum Status {
+  active
+  inactive
+}
+
+enum TypeMessage {
+  public
+  draft
+}
+
+enum TypeSchedule {
+  daily
+  weekly
+  monthly
+}
+
+enum StatusNotification {
+  running
+  postpone
+  suspend
+  end
+  draft
+  canceled
+}
+
+enum StatusHistoryNotification {
+  success
+  fail
+}
+
+model user {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  avatar       String?
+  name         String
+  phone        String?
+  password     String
+  type         TypeUser
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @default(now())
+  deleted_at   DateTime?
+  message      message[]
+  contact      contact[]
+  notification notification[]
+}
+
+model message {
+  id         Int         @id @default(autoincrement())
+  name       String
+  message    String      @db.Text
+  type       TypeMessage
+  created_at DateTime    @default(now())
+  updated_at DateTime    @default(now())
+  deleted_at DateTime?
+
+  user         user           @relation(fields: [user_id], references: [id])
+  user_id      Int
+  notification notification[]
+}
+
+model contact {
+  id                 Int       @id @default(autoincrement())
+  name               String
+  tool               String
+  phone              String
+  email              String
+  location           String
+  first_time_contact DateTime?
+  last_time_contact  DateTime?
+  sales              String?
+  status             Status    @default(active)
+  type               String?
+  products           String?
+  services           String?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @default(now())
+  deleted_at         DateTime?
+
+  user         user           @relation(fields: [user_id], references: [id])
+  user_id      Int
+  notification notification[]
+}
+
+model notification {
+  id              Int                @id @default(autoincrement())
+  name            String
+  description     String
+  time_start      DateTime
+  time_end        DateTime
+  time_schedule   String
+  type_schedule   TypeSchedule
+  received        Int                @default(0)
+  responsed       Int                @default(0)
+  total_send      Int                @default(0)
+  status          StatusNotification
+  channels        String[]
+  suspended_until DateTime? // When notification should be resumed (for suspend/postpone)
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @default(now())
+  deleted_at      DateTime?
+
+  //relations
+  user                 user                   @relation(fields: [user_id], references: [id])
+  user_id              Int
+  contact              contact                @relation(fields: [contact_id], references: [id])
+  contact_id           Int
+  message              message                @relation(fields: [message_id], references: [id])
+  message_id           Int
+  history_notification history_notification[]
+}
+
+model history_notification {
+  id         Int                       @id @default(autoincrement())
+  status     StatusHistoryNotification
+  channel    String
+  created_at DateTime                  @default(now())
+  updated_at DateTime                  @default(now())
+  deleted_at DateTime?
+
+  //relations
+  notification    notification @relation(fields: [notification_id], references: [id])
+  notification_id Int
+}
