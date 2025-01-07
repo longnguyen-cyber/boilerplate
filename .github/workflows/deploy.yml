@@ -21,22 +21,22 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no ubuntu@47.129.246.242 'echo "SSH connection successful"'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'echo "SSH connection successful"'
 
-      # - name: Deploy with rsync
-      #   uses: burnett01/rsync-deployments@5.1
-      #   with:
-      #     switches: -avzr --delete
-      #     path: ./dist/*
-      #     remote_path: /home/${{ secrets.EC2_USER }}/my-app-2/
-      #     remote_host: ${{ secrets.EC2_HOST }}
-      #     remote_user: ${{ secrets.EC2_USER }}
-      #     remote_key: '${{ secrets.SSH_PRIVATE_KEY }}'
-      # - name: Start Server
-      #   run: |
-      #     #  This is the private key used to connect to the server(key.pem in ec2)
-      #     ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-      #       cd /home/${{ secrets.EC2_USER }}/my-app-2
-      #       pm2 start dist/main.js --name test_app_2
-      #       pm2 save
-      #     '
+      - name: Deploy with rsync
+        uses: burnett01/rsync-deployments@5.1
+        with:
+          switches: -avzr --delete
+          path: ./dist/*
+          remote_path: /home/${{ secrets.EC2_USER }}/my-app/
+          remote_host: ${{ secrets.EC2_HOST }}
+          remote_user: ${{ secrets.EC2_USER }}
+          remote_key: '${{ secrets.SSH_PRIVATE_KEY }}'
+      - name: Start Server
+        run: |
+          #  This is the private key used to connect to the server(key.pem in ec2)
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+            cd /home/${{ secrets.EC2_USER }}/my-app
+            chmod +x deploy.sh
+            ./deploy.sh
+          '
