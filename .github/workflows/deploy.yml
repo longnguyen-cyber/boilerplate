@@ -28,15 +28,15 @@ jobs:
         with:
           switches: -avzr --delete
           path: ./dist/*
-          remote_path: /home/${{ secrets.EC2_USER }}/my-app/
-          remote_host: ${{ secrets.EC2_HOST }}
-          remote_user: ${{ secrets.EC2_USER }}
+          remote_path: /home/ubuntu/my-app/
+          remote_host: 47.129.246.242
+          remote_user: ubuntu
           remote_key: '${{ secrets.SSH_PRIVATE_KEY }}'
       - name: Start Server
         run: |
           #  This is the private key used to connect to the server(key.pem in ec2)
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-            cd /home/${{ secrets.EC2_USER }}/my-app
+          ssh -o StrictHostKeyChecking=no ubuntu@47.129.246.242 '
+            cd /home/ubuntu/my-app
             chmod +x deploy.sh
             ./deploy.sh
           '
