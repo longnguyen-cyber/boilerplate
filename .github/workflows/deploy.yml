@@ -27,7 +27,6 @@ jobs:
         uses: burnett01/rsync-deployments@5.1
         with:
           switches: -avzr --delete
-          path: ./dist/*
           remote_path: /home/ubuntu/my-app/
           remote_host: 47.129.246.242
           remote_user: ubuntu
